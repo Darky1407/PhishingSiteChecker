@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Select main elements
+    // Main elements
     const scanForm = document.getElementById('scan-form');
     const scannerDiv = document.getElementById('scanner');
     const urlInput = document.getElementById('urlInput');
     const checkButton = document.getElementById('checkButton');
     const scanAnotherButtons = document.querySelectorAll('.scan-another');
-    
-    // Select the unified result container and its parts
+
+    // Result elements
     const resultContainer = document.getElementById('result-container');
     const resultHeader = document.getElementById('result-header');
     const resultIcon = document.getElementById('result-icon');
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const assessmentGrid = document.getElementById('assessment-grid');
     const assessmentSection = document.getElementById('assessment-section');
 
-    const apiUrl = '/predict';
+    const apiUrl = '/predict'; // Flask endpoint
 
     const handleScan = () => {
         const urlToCheck = urlInput.value.trim();
@@ -27,72 +27,75 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Show loader
         scanForm.classList.add('hidden');
         resultContainer.classList.add('hidden');
         scannerDiv.classList.remove('hidden');
 
-        const isPhishing = Math.random() > 0.4;
-        const scanDuration = (Math.random() * 1.5 + 0.5).toFixed(2);
-        const confidence = isPhishing ? (Math.random() * 15 + 85) : (Math.random() * 10 + 90);
-        
-const handleScan = () => {
-    const urlToCheck = urlInput.value.trim();
-    if (!urlToCheck) { alert('Please enter a URL'); return; }
+        const startTime = Date.now();
 
-    scanForm.classList.add('hidden');
-    resultContainer.classList.add('hidden');
-    scannerDiv.classList.remove('hidden');
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: urlToCheck })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const endTime = Date.now();
+            const duration = ((endTime - startTime)/1000).toFixed(2) + 's';
 
-    fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: urlToCheck })
-    })
-    .then(res => res.json())
-    .then(data => displayResult(data))
-    .catch(err => {
-        scannerDiv.classList.add('hidden');
-        scanForm.classList.remove('hidden');
-        alert("Error scanning URL: " + err);
-    });
-};
+            // Build data object for display
+            const resultData = {
+                result: data.result,
+                scannedUrl: data.url,
+                scanDuration: duration,
+                confidence: data.confidence,
+                assessments: {
+                    unencryptedHttp: data.https === 0,
+                    suspiciousDomain: data.phishing_prob > 60,
+                    recentlyRegistered: false,
+                    knownPatterns: false
+                }
+            };
 
-        setTimeout(() => {
-            displayResult(fakeResult);
-        }, 2000);
+            displayResult(resultData);
+        })
+        .catch(err => {
+            scannerDiv.classList.add('hidden');
+            scanForm.classList.remove('hidden');
+            alert('Error scanning URL: ' + err);
+        });
     };
 
     const displayResult = (data) => {
         scannerDiv.classList.add('hidden');
         resultContainer.classList.remove('hidden');
-        
-        // 1. Update Header
+
+        // Header
         resultHeader.classList.remove('safe', 'danger');
         if (data.result === 'Phishing') {
             resultHeader.classList.add('danger');
             resultIcon.className = 'fas fa-exclamation-triangle';
-            // Set text and data-text attribute for glitch
             resultTitle.textContent = 'Potential Risk Detected';
             resultTitle.setAttribute('data-text', 'Potential Risk Detected');
         } else {
             resultHeader.classList.add('safe');
             resultIcon.className = 'fas fa-check-circle';
-            // Set text and data-text attribute for glitch
             resultTitle.textContent = 'URL is Safe';
             resultTitle.setAttribute('data-text', 'URL is Safe');
         }
 
-        // 2. Populate Summary
+        // Summary
         scannedUrlText.textContent = data.scannedUrl;
         scanDurationText.textContent = data.scanDuration;
 
-        // 3. Update Confidence Score
+        // Confidence
         confidenceText.textContent = `${data.confidence}% Confidence`;
         confidenceFill.style.width = `${data.confidence}%`;
         confidenceFill.className = 'progress-fill';
         confidenceFill.classList.add(data.result === 'Phishing' ? 'danger' : 'safe');
 
-        // 4. Build Assessment Grid
+        // Assessment grid
         assessmentGrid.innerHTML = '';
         if (data.result === 'Phishing') {
             assessmentSection.classList.remove('hidden');
