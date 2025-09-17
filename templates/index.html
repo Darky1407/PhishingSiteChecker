@@ -1,77 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberScan | URL Analyzer</title>
-    
-    <!-- Flask static CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
-    <!-- Fonts & icons (external) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-</head>
-<body>
-    <div class="background-grid"></div>
+from flask import Flask, render_template, request, jsonify
+import joblib
+import os
+from url_extractor import FeatureExtractor  # your feature code
 
-    <header class="main-header">
-        <h1 class="logo">CyberScan_</h1>
-    </header>
+app = Flask(__name__)
 
-    <main class="container">
-        <div id="scan-form">
-            <h2 class="title" data-text="URL ANALYZER">URL ANALYZER</h2>
-            <p class="subtitle">Enter a URL to analyze for potential threats in real-time.</p>
-            <div class="input-wrapper">
-                <input type="text" id="urlInput" placeholder="https://example.com">
-                <button id="checkButton"><i class="fas fa-search"></i></button>
-            </div>
-            <div class="features">
-                <div class="feature-item"><i class="fas fa-shield-alt icon-safe"></i> Real-time Protection</div>
-                <div class="feature-item"><i class="fas fa-bullseye icon-primary"></i> 98% Accuracy</div>
-                <div class="feature-item"><i class="fas fa-bolt icon-warning"></i> Instant Results</div>
-            </div>
-        </div>
+# Load model safely
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "rf_phishing_model.pkl")
+bundle = joblib.load(MODEL_PATH)
+model = bundle["model"]
+features = bundle["features"]
 
-        <div id="scanner" class="hidden">
-            <div class="loader"></div>
-            <p>Scanning...</p>
-        </div>
+@app.route('/')
+def home():
+    return render_template('index.html')
 
-        <div id="result-container" class="result-card hidden">
-            <div id="result-header" class="result-header">
-                <i id="result-icon" class="fas"></i>
-                <h2 id="result-title" class="title"></h2>
-            </div>
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.get_json()
+    url = data.get('url')
+    if not url:
+        return jsonify({'error': 'No URL provided'}), 400
 
-            <div class="scan-summary">
-                <div><span>URL Scanned:</span> <span id="scanned-url"></span></div>
-                <div><span>Scan Duration:</span> <span id="scan-duration"></span></div>
-            </div>
+    fe = FeatureExtractor(url)
+    feature_dict = fe.get_features()
+    X = [feature_dict[f] for f in features]
+    prob = model.predict_proba([X])[0][1]
+    label = 'Phishing' if prob > 0.5 else 'Legitimate'
 
-            <div class="confidence-section">
-                <h3>Confidence Score</h3>
-                <div class="progress-bar">
-                    <div id="confidence-fill" class="progress-fill"></div>
-                </div>
-                <span id="confidence-text"></span>
-            </div>
+    return jsonify({
+        'url': url,
+        'result': label,
+        'confidence': round(prob*100, 2),
+        'https': feature_dict['ssl_final_state'],
+        'phishing_prob': round(prob*100, 2)
+    })
 
-            <div id="assessment-section">
-                <h3 class="assessment-title">Security Assessment</h3>
-                <div id="assessment-grid" class="assessment-grid"></div>
-            </div>
-            
-            <div class="button-group">
-                <button class="btn btn-primary scan-another">New Check</button>
-            </div>
-        </div>
-    </main>
-
-    <!-- Flask static JS -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+if __name__ == "__main__":
+    app.run(debug=True)
