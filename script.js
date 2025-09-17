@@ -35,18 +35,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const scanDuration = (Math.random() * 1.5 + 0.5).toFixed(2);
         const confidence = isPhishing ? (Math.random() * 15 + 85) : (Math.random() * 10 + 90);
         
-        const fakeResult = {
-            result: isPhishing ? 'Phishing' : 'Legitimate',
-            scannedUrl: urlToCheck,
-            scanDuration: `${scanDuration}s`,
-            confidence: confidence.toFixed(2),
-            assessments: {
-                unencryptedHttp: isPhishing ? Math.random() > 0.7 : false,
-                suspiciousDomain: isPhishing ? Math.random() > 0.5 : false,
-                recentlyRegistered: isPhishing ? Math.random() > 0.6 : false,
-                knownPatterns: isPhishing ? Math.random() > 0.5 : false,
-            }
-        };
+const handleScan = () => {
+    const urlToCheck = urlInput.value.trim();
+    if (!urlToCheck) { alert('Please enter a URL'); return; }
+
+    scanForm.classList.add('hidden');
+    resultContainer.classList.add('hidden');
+    scannerDiv.classList.remove('hidden');
+
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: urlToCheck })
+    })
+    .then(res => res.json())
+    .then(data => displayResult(data))
+    .catch(err => {
+        scannerDiv.classList.add('hidden');
+        scanForm.classList.remove('hidden');
+        alert("Error scanning URL: " + err);
+    });
+};
 
         setTimeout(() => {
             displayResult(fakeResult);
