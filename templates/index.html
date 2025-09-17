@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberScan | URL Analyzer</title>
-    <link rel="stylesheet" href="style.css">
     
+    <!-- Flask static CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Fonts & icons (external) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 </head>
 <body>
@@ -60,8 +62,7 @@
 
             <div id="assessment-section">
                 <h3 class="assessment-title">Security Assessment</h3>
-                <div id="assessment-grid" class="assessment-grid">
-                    </div>
+                <div id="assessment-grid" class="assessment-grid"></div>
             </div>
             
             <div class="button-group">
@@ -70,6 +71,7 @@
         </div>
     </main>
 
-    <script src="script.js"></script>
+    <!-- Flask static JS -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
