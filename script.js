@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const assessmentGrid = document.getElementById('assessment-grid');
     const assessmentSection = document.getElementById('assessment-section');
 
-    const apiUrl = 'http://127.0.0.1:5000/predict';
+    const apiUrl = '/predict';
 
     const handleScan = () => {
         const urlToCheck = urlInput.value.trim();
