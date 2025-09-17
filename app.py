@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import joblib
 import pandas as pd
-from phishing_features_parallel_ssl import FeatureExtractor
+from url_extractor import FeatureExtractor
 
 app = Flask(__name__)
 
