@@ -1,21 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberScan | URL Analyzer</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberScan | URL Analyzer</title>
 
-    <!-- Flask static CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+<!-- CSS from static folder -->
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 </head>
 <body>
     <div class="background-grid"></div>
@@ -31,11 +28,6 @@
             <div class="input-wrapper">
                 <input type="text" id="urlInput" placeholder="https://example.com">
                 <button id="checkButton"><i class="fas fa-search"></i></button>
-            </div>
-            <div class="features">
-                <div class="feature-item"><i class="fas fa-shield-alt icon-safe"></i> Real-time Protection</div>
-                <div class="feature-item"><i class="fas fa-bullseye icon-primary"></i> 98% Accuracy</div>
-                <div class="feature-item"><i class="fas fa-bolt icon-warning"></i> Instant Results</div>
             </div>
         </div>
 
@@ -74,7 +66,7 @@
         </div>
     </main>
 
-    <!-- Flask static JS -->
+    <!-- JS from static folder -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
